@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://auvelle.ca/sitemap.xml
