@@ -229,6 +229,18 @@
     textarea { min-height: 120px; resize: vertical; }
     form .btn { width: 100%; padding: 18px; margin-top: 6px; }
     .form-note { font-size: 13px; color: var(--muted); margin: 0; text-align: center; }
+    .form-error { font-size: 14px; color: #e59a7d; margin: 0; text-align: center; }
+    .form-error a { color: var(--gold); }
+    .form-success[hidden], form[hidden] { display: none; }
+    .form-success {
+      padding: 64px 44px; border-radius: 26px; text-align: center;
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015));
+      border: 1px solid rgba(214,170,92,.45);
+    }
+    .form-success .tick { color: var(--gold); font-size: 26px; margin-bottom: 14px; }
+    .form-success h3 { font-size: 46px; margin-bottom: 14px; }
+    .form-success p { color: var(--text); margin: 0 auto; max-width: 380px; }
+    button[disabled] { opacity: .7; cursor: wait; }
 
     /* Footer */
     footer { border-top: 1px solid var(--line); padding: 90px 0 40px; position: relative; overflow: hidden; }
@@ -482,9 +494,8 @@
         </ul>
         <p class="reveal d3" style="margin-top:34px;color:var(--muted)">Prefer email? <a href="mailto:info@auvelle.ca" style="color:var(--gold)">info@auvelle.ca</a></p>
       </div>
-      <form class="reveal d1" action="https://formsubmit.co/info@auvelle.ca" method="POST">
-        <input type="hidden" name="_subject" value="New free audit request from auvelle.ca">
-        <input type="hidden" name="_template" value="table">
+      <div>
+      <form id="audit-form" class="reveal d1" action="https://script.google.com/macros/s/AKfycbxG-8ckWhDtsq2bWR1yPEeeoEVdcgW5cvrjmZAWhAHQBH-JR9We1YMNxfkD84ExQM4k/exec" method="POST">
         <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
         <div class="row">
           <label>Your name<input type="text" name="name" required autocomplete="name"></label>
@@ -522,7 +533,14 @@
         <label>What are your goals?<textarea name="message" placeholder="e.g. more quote requests across Peel Region, a stronger Instagram presence…"></textarea></label>
         <button class="btn" type="submit">Request my free audit <span class="arrow">→</span></button>
         <p class="form-note">We respond within one business day. Your information is used solely to prepare your audit.</p>
+        <p class="form-error" role="alert" hidden>Something went wrong. Please email us at <a href="mailto:info@auvelle.ca">info@auvelle.ca</a>.</p>
       </form>
+      <div class="form-success" id="audit-success" hidden>
+        <div class="tick">✦</div>
+        <h3>Thank you.</h3>
+        <p>Your audit request has been received. A member of our team will be in touch within one business day.</p>
+      </div>
+      </div>
     </div>
   </section>
 </main>
@@ -558,6 +576,21 @@
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
   }), { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  const form = document.getElementById('audit-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type=submit]');
+    const err = form.querySelector('.form-error');
+    err.hidden = true; btn.disabled = true; btn.firstChild.textContent = 'Sending… ';
+    try {
+      await fetch(form.action, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(new FormData(form)) });
+      form.hidden = true;
+      const ok = document.getElementById('audit-success'); ok.hidden = false;
+      ok.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (x) {
+      err.hidden = false; btn.disabled = false; btn.firstChild.textContent = 'Request my free audit ';
+    }
+  });
 </script>
 </body>
 </html>
